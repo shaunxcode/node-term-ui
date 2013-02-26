@@ -124,6 +124,10 @@ module.exports = T = new class TermUI extends EventEmitter
     @out '\x1b[2K'
     this
 
+  eraseToEnd: -> 
+    @out '\x1b[K'
+    this
+    
   handleKeypress: (c, key) =>
     if (key && key.ctrl && key.name == 'c')
       @quit()
