@@ -297,6 +297,6 @@ T.on "any", (event, eventData) ->
 
 require "./widgets/Button"
 require "./widgets/Box"
-require "./Widgets/Tabs"
-require "./Widgets/Select"
-require "./Widgets/TextInput"
+require "./widgets/Tabs"
+require "./widgets/Select"
+require "./widgets/TextInput"
