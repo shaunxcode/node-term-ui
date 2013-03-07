@@ -1,5 +1,6 @@
 T = require "../TermUI"
 T.hideCursor()
+T.clear()
 
 input = new T.TextInput
 	bounds:
@@ -18,3 +19,6 @@ name = new T.TextInput
 		w: 15
 
 name.draw()
+
+name.on "change", -> 
+	T.pos(10,18).eraseLine().out "NAME: " + name.val()

@@ -72,7 +72,7 @@ module.exports = T = new class TermUI extends EventEmitter
 
   out: (buf) ->
     if @isTerm
-      process.stdout.write(buf)
+      process.stdout.write(String buf)
     this
 
   hideCursor: ->
@@ -220,83 +220,10 @@ module.exports = T = new class TermUI extends EventEmitter
     process.exit()
 
 
-# ===============================================================[ Widget ]====
-class T.Widget extends EventEmitter
-  constructor: (@options = {}) ->
-    @bounds = 
-      x: @options.bounds?.x or 0
-      y: @options.bounds?.y or 0
-      w: @options.bounds?.w or 0
-      h: @options.bounds?.h or 0
-
-    T.Widget.instances.push this
-    @allowFocus = true 
-
-  disallowFocus: -> 
-    @allowFocus = false
-    this
-
-  draw: ->
-    @emit "drawn"
-
-  hitTest: (x, y) ->
-    (@bounds.x <= x <= (@bounds.x + @bounds.w - 1)) and
-    (@bounds.y <= y <= (@bounds.y + @bounds.h - 1))
-
-  handleTab: -> 
-
-  handleKey: (char, key) -> 
-    if @["onKey_#{key.name}"]
-      return @["onKey_#{key.name}"]()
-
-  focus: -> 
-    @_active = true 
-    this
-
-  blur: -> 
-    @_active = false
-    this
-
-T.Widget.instances = []
-T.Widget.activeIndex = false
-T.Widget.activeInstance = false
-T.Widget.nextFocussableInstance = (loopAround = true) -> 
-  #focus new 
-
-  for widget, windex in T.Widget.instances[T.Widget.activeIndex..-1]
-    if widget isnt T.Widget.activeInstance and widget.allowFocus
-      if T.Widget.activeInstance
-        T.Widget.activeInstance.blur()
-      T.Widget.activeIndex = windex
-      T.Widget.activeInstance = widget 
-      T.Widget.activeInstance.focus()
-      return 
-
-  if loopAround 
-    T.Widget.activeIndex = 0 
-    T.Widget.nextFocussableInstance false
-
-T.on "resize", -> 
-  T.clear()
-  for widget in T.Widget.instances 
-    widget.draw()
-
-T.on "keypress", (char, key) ->
-  if T.Widget.instances.length 
-    if key?.name is "tab"
-      if T.Widget.activeInstance is false or (not T.Widget.activeInstance.handleTab())
-        T.Widget.nextFocussableInstance()
-    else if T.Widget.activeInstance
-      T.Widget.activeInstance.handleKey char, key
-
-T.on "any", (event, eventData) ->
-  for widget in T.Widget.instances
-    if widget.hitTest eventData.x, eventData.y
-      eventData.target = widget
-      widget.emit event, eventData
-
+require "./widgets/Widget"
 require "./widgets/Button"
 require "./widgets/Box"
 require "./widgets/Tabs"
 require "./widgets/Select"
 require "./widgets/TextInput"
+require "./widgets/Grid"

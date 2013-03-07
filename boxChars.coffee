@@ -1,34 +1,69 @@
+#types = 
+#	light: 1 
+#	heavy: 2
+#	double: 3
+
 boxChars =
-	0x2500: "lightHorizontal"
-	0x2501: "heavyHorizontal"
-	0x2502: "lightVertical"
-	0x2503: "heavyVertical"
-	0x2504: "lightTripleDashHorizontal"
-	0x2505: "heavyTripleDashHorizontal"
-	0x2506: "lightTripleDashVertical"
-	0x2507: "heavyTripleDashVertical"
-	0x2508: "lightQuadrupleDashHorizontal"
-	0x2509: "heavyQuadrupleDashHorizontal"
-	0x250A: "lightQuadrupleDashVertical"
-	0x250B: "heavyQuadrupleDashVertical"
-	0x250C: "lightDownAndRight"
-	0x250D: "downLightAndRightHeavy"
-	0x250E: "downHeavyAndRightLight"
-	0x250F: "heavyDownAndRight"
-	0x2510: "lightDownAndLeft"
-	0x2518: "lightUpAndLeft"
-	0x2514: "lightUpAndRight"
-	0x251C: "lightVerticalAndRight"	
-	0x2524: "lightVerticalAndLeft"
-	0x2534: "lightUpAndHorizontal"
-	0x252C: "lightDownAndHorizontal"
-	0x254A: "leftLightAndRightVerticalHeavy"
-	0x2525: "verticalLightAndLeftHeavy"
-	0x2551: "doubleVertical"
-	
-codes = {}
+	"1100": 0x2500
+	"2200": 0x2501
+	"0011": 0x2502
+	"0022": 0x2503
+	"0101": 0x250C
+	"0201": 0x250D
+	"0102": 0x250E
+	"0202": 0x250F
+	"1001": 0x2510
+	"1010": 0x2518
+	"0110": 0x2514
+	"0111": 0x251C
+	"1011": 0x2524
+	"1110": 0x2534
+	"1101": 0x252C
+	"1120": 0x2538
+	"2011": 0x2525
+	"0033": 0x2551
+	"2220": 0x253B
+	"2202": 0x2533
+	"2201": 0x252F
+	"0122": 0x2520
+	"1122": 0x2542
+	"1111": 0x253C
+	"0222": 0x2523
+	"2222": 0x254B
+	"2211": 0x253F
+	"0120": 0x2516
+	"2001": 0x2511
+	"1102": 0x2530
+	"2002": 0x2513
+	"1022": 0x2528
+	"2022": 0x252B
+	"0220": 0x2517
+	"2020": 0x251B
+	"1002": 0x2512
+	"0211": 0x251D
+	"0210": 0x2515
+	"2010": 0x2519
+	"2210": 0x2537
+	"0303": 0x2554
+	"3301": 0x2564
+	"3303": 0x2566
+	"3003": 0x2557 
+	"3300": 0x2550
+	"0133": 0x255F
+	"1133": 0x256B
+	"1033": 0x2562
+	"0333": 0x2560
+	"3311": 0x256A
+	"3333": 0x256C
+	"3033": 0x2563
+	"0330": 0x255A
+	"3310": 0x2567
+	"3330": 0x2569
+	"3030": 0x255D
 
-for code, name of boxChars
-	codes[name] = String.fromCharCode code
+for k, v of boxChars
+	boxChars[k] = String.fromCharCode v 
 
-module.exports = codes
+module.exports = (c...) -> 
+	if not boxChars[c.join ""] then console.log "GOT: #{c.join ""}", boxChars[c.join ""]
+	boxChars[c.join ""]

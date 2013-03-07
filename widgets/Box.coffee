@@ -10,9 +10,12 @@ _d = (x) ->
 class T.Box extends T.Widget
 	constructor: (opts) -> 
 		super opts
-		@borders = _.extend(
-			{l: true, r: true, t: true, b: true}
-			opts.borders ? {})
+		if opts.borders? and not opts.borders 
+			@borders = l: false, r: false, t: false, b: false
+		else
+			@borders = _.extend(
+				{l: true, r: true, t: true, b: true}
+				opts.borders ? {})
 
 		
 		@content = opts.content ? []
@@ -31,8 +34,8 @@ class T.Box extends T.Widget
 		@maxScrollY = @bounds.y + @maxHeight
 		@contentRange = [@bounds.y+1..@bounds.y+@maxHeight]
 		@rightBorderX = @bounds.x + @bounds.w - (if @borders.l then 1 else 0)
-		@rightBorderChar = if @borders.r then B.lightVertical else " "
-		@leftBorderChar = if @borders.l then B.lightVertical else " "
+		@rightBorderChar = if @borders.r then (B 0, 0, 1, 1) else "" 
+		@leftBorderChar = if @borders.l then (B 0, 0, 1, 1) else ""
 		@borderColor = opts.borderColor ? T.C.g 
 		@contentColor = opts.contentColor ? T.C.g
 
@@ -49,21 +52,24 @@ class T.Box extends T.Widget
 		T.hideCursor().saveFg().fg @borderColor
 		if @borders.t 
 			T.pos(@bounds.x, @bounds.y)
-				.out(if @borders.l then B.lightDownAndRight else B.lightHorizontal)
-				.out(_.repeat B.lightHorizontal, @bounds.w - @hbdiff)
-				.out(if @borders.r then B.lightDownAndLeft else B.lightHorizontal)
-			
+				.out(if @borders.l then (B 0, 1, 0, 1) else (B 1, 1, 0, 0))
+				.out(_.repeat (B 1, 1, 0, 0), @bounds.w - @hbdiff)
+				.out(if @borders.r then (B 1, 0, 0, 1) else (B 1, 1, 0, 0))
+
+		
 		if @borders.b
 			T.pos(@bounds.x, @bounds.y + @bounds.h - 1)
-				.out(if @borders.l then B.lightUpAndRight else B.lightHorizontal)
-				.out(_.repeat B.lightHorizontal, @bounds.w - @hbdiff)
-				.out(if @borders.r then B.lightUpAndLeft else B.lightHorizontal)
+				.out(if @borders.l then (B 0, 1, 1, 0) else (B 0, 0, 1, 1))
+				.out(_.repeat (B 1, 1, 0, 0), @bounds.w - @hbdiff)
+				.out(if @borders.r then (B 1, 0, 1, 0) else (B 1, 1, 0, 0))
 
+		
 		for row in @contentRange
 			T.pos(@bounds.x, row)
 				.out(@leftBorderChar)
 				.pos(@rightBorderX, row)
 				.out(@rightBorderChar)
+ 		
  		
 		T.restoreFg()
 
@@ -86,7 +92,7 @@ class T.Box extends T.Widget
 			if content.length > @maxWidth
 				content = content[0..@maxWidth-3] + ".."
 			else
-				content = _.pad content, @maxWidth, " ", "right" 
+				content = _.rpad content, @maxWidth, " "
 
 			@_drawRow x, line, content, ci 
 
@@ -110,7 +116,7 @@ class T.Box extends T.Widget
 		@scrollPos = @scrollPos + byAmt
 
 		T.pos(@rightBorderX, @_scrollY())
-			.out(B.doubleVertical)
+			.out(B 0, 0, 3, 3)
 
 		T.restoreFg()
 
