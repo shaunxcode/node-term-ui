@@ -59,7 +59,8 @@ class T.Tabs extends T.Widget
 		T.out(_.repeat (T.B 1, 1, 0, 0), T.width - (x - 1))
 
 		T.restoreCursor()
-
+		super()
+		
 	hitTest: (x, y) -> 
 		T.pos(15, 15).out("x:#{x}, y:#{y}")
 		for tab, bounds of @_tabBounds
