@@ -1,5 +1,5 @@
-T = require "../TermUI"
-B = require "../boxChars"
+T = require "../src/TermUI"
+B = require "../src/boxChars"
 
 T.clear()
 T.hideCursor()

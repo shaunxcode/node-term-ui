@@ -1,4 +1,4 @@
-T = require "../TermUI"
+T = require "../src/TermUI"
 T.clear()
 T.hideCursor()
 

@@ -1,7 +1,7 @@
 {
   "name": "node-term-ui",
-  "version": "0.0.5",
-  "main": "TermUI.coffee",
+  "version": "0.0.6",
+  "main": "./lib/TermUI.js",
   "dependencies": {
     "underscore": "",
     "underscore.string": "",
