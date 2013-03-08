@@ -12,12 +12,14 @@ class T.Widget extends EventEmitter
     
     @_widgetIndex = (T.Widget.instances.push this) - 1
     @allowFocus = true 
+    @visible = false
 
   disallowFocus: -> 
     @allowFocus = false
     this
 
   draw: ->
+    @visible = true
     @emit "drawn"
 
   hitTest: (x, y) ->
@@ -51,7 +53,7 @@ T.Widget.activeIndex = false
 T.Widget.activeInstance = false
 T.Widget.nextFocussableInstance = (loopAround = true) -> 
   for widget, windex in T.Widget.instances[T.Widget.activeIndex or 0..-1]
-    if (widget isnt T.Widget.activeInstance) and widget.allowFocus
+    if (widget isnt T.Widget.activeInstance) and widget.allowFocus and widget.visible
         return widget.focus()
 
   if loopAround 

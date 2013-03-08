@@ -9,7 +9,9 @@ _d = (x) ->
 	if _dl > 30 then _dl = 19 
 class T.Box extends T.Widget
 	constructor: (opts) -> 
-		super opts
+		@content = opts.content ? []
+		@children = opts.children ? []
+
 		if opts.borders? and not opts.borders 
 			@borders = l: false, r: false, t: false, b: false
 		else
@@ -17,10 +19,7 @@ class T.Box extends T.Widget
 				{l: true, r: true, t: true, b: true}
 				opts.borders ? {})
 
-		
-		@content = opts.content ? []
-		@scrollPos = 0 
-
+		#calculate border dims
 		@vbdiff = 0 
 		@hbdiff = 0 
 
@@ -29,15 +28,59 @@ class T.Box extends T.Widget
 		if @borders.t then @vbdiff++
 		if @borders.b then @vbdiff++
 
+		if opts.bounds?.w is "fit"
+			if @content.length
+				opts.bounds.w = _.last(_.sortBy @content, (c) -> c.length).length + @hbdiff 
+			else
+				opts.bounds.w = 0 
+
+			for child in @children 
+				if (nw = child.bounds.x + child.bounds.w + child.hbdiff) > opts.bounds.w
+					opts.bounds.w = nw
+
+		if opts.bounds?.h is "fit"
+			if @content.length
+				opts.bounds.h = @content.length + @vbdiff 
+			else
+				opts.bounds.h = 0 
+
+			for child in @children 
+				if (nh = child.bounds.y + child.bounds.h + child.vbdiff) > opts.bounds.h
+					opts.bounds.h = nh
+
+		super opts	
+		
+		@scrollPos = 0 
+		
+		@rightBorderChar = if @borders.r then (B 0, 0, 1, 1) else "" 
+		@leftBorderChar = if @borders.l then (B 0, 0, 1, 1) else ""
+
+		if opts.roundedCorners 
+			@topLeftCorner = B 0, 6, 0, 6
+			@topRightCorner = B 6, 0, 0, 6 
+			@botLeftCorner = B 0, 6, 6, 0 
+			@botRightCorner = B 6, 0, 6, 0 
+		else
+			@topLeftCorner = B 0, 1, 0, 1
+			@topRightCorner = B 1, 0, 0, 1
+			@botLeftCorner = B 0, 1, 1, 0 
+			@botRightCorner = B 1, 0, 1, 0 
+
+		@borderColor = opts.borderColor ? T.C.g 
+		@contentColor = opts.contentColor ? T.C.g
+		@calcDims()
+
+		for child in @children 
+			child.bounds.x += @bounds.x 
+			child.bounds.y += @bounds.y
+			child.calcDims()
+
+	calcDims: -> 
 		@maxWidth = @bounds.w - @hbdiff
 		@maxHeight = @bounds.h - @vbdiff
 		@maxScrollY = @bounds.y + @maxHeight
 		@contentRange = [@bounds.y+1..@bounds.y+@maxHeight]
 		@rightBorderX = @bounds.x + @bounds.w - (if @borders.l then 1 else 0)
-		@rightBorderChar = if @borders.r then (B 0, 0, 1, 1) else "" 
-		@leftBorderChar = if @borders.l then (B 0, 0, 1, 1) else ""
-		@borderColor = opts.borderColor ? T.C.g 
-		@contentColor = opts.contentColor ? T.C.g
 
 	setBorderColor: (c) -> 
 		@borderColor = c
@@ -52,16 +95,16 @@ class T.Box extends T.Widget
 		T.hideCursor().saveFg().fg @borderColor
 		if @borders.t 
 			T.pos(@bounds.x, @bounds.y)
-				.out(if @borders.l then (B 0, 1, 0, 1) else (B 1, 1, 0, 0))
+				.out(if @borders.l then @topLeftCorner else (B 1, 1, 0, 0))
 				.out(_.repeat (B 1, 1, 0, 0), @bounds.w - @hbdiff)
-				.out(if @borders.r then (B 1, 0, 0, 1) else (B 1, 1, 0, 0))
+				.out(if @borders.r then @topRightCorner else (B 1, 1, 0, 0))
 
 		
 		if @borders.b
 			T.pos(@bounds.x, @bounds.y + @bounds.h - 1)
-				.out(if @borders.l then (B 0, 1, 1, 0) else (B 0, 0, 1, 1))
+				.out(if @borders.l then @botLeftCorner else (B 0, 0, 1, 1))
 				.out(_.repeat (B 1, 1, 0, 0), @bounds.w - @hbdiff)
-				.out(if @borders.r then (B 1, 0, 1, 0) else (B 1, 1, 0, 0))
+				.out(if @borders.r then @botRightCorner else (B 1, 1, 0, 0))
 
 		
 		for row in @contentRange
@@ -95,6 +138,8 @@ class T.Box extends T.Widget
 				content = _.rpad content, @maxWidth, " "
 
 			@_drawRow x, line, content, ci 
+
+		child.draw() for child in @children 
 
 		@emit "contentDrawn"
 		this

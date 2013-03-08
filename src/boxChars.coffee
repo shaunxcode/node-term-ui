@@ -60,7 +60,11 @@ boxChars =
 	"3310": 0x2567
 	"3330": 0x2569
 	"3030": 0x255D
-
+	"0606": 0x256D
+	"6006": 0x256E
+	"6060": 0x256F
+	"0660": 0x2570
+	
 for k, v of boxChars
 	boxChars[k] = String.fromCharCode v 
 
