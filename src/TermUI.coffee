@@ -49,6 +49,8 @@ module.exports = T = new class TermUI extends EventEmitter
 
   S: { normal: 0, bold: 1, underline: 4, blink: 5, inverse: 8 }
 
+  B: require "./boxChars"
+  
   SYM: {
     star: '\u2605',
     check: '\u2714',

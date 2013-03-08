@@ -27,7 +27,6 @@ class T.Widget extends EventEmitter
   handleTab: -> 
 
   handleKey: (char, key) -> 
-
     if key?.name? and @["onKey_#{key.name}"]
       return @["onKey_#{key.name}"]()
 
@@ -53,7 +52,7 @@ T.Widget.activeInstance = false
 T.Widget.nextFocussableInstance = (loopAround = true) -> 
   for widget, windex in T.Widget.instances[T.Widget.activeIndex or 0..-1]
     if (widget isnt T.Widget.activeInstance) and widget.allowFocus
-      return widget.focus()
+        return widget.focus()
 
   if loopAround 
     T.Widget.activeIndex = 0 

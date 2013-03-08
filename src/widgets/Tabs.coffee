@@ -3,8 +3,6 @@ _.mixin require "underscore.string"
 
 T = require "../TermUI"
 
-B = require "../boxChars"
-
 class T.Tabs extends T.Widget
 	constructor: (opts) -> 
 		super opts
@@ -32,33 +30,33 @@ class T.Tabs extends T.Widget
 			@_tabBounds[tab] = x: x, y: y, w: width, height: 3 
 
 			T.pos(x, y + 2)
-				.out(B.lightHorizontal)
+				.out(T.B 1, 1, 0, 0)
 				.pos(x + 1, y + 1)
-				.out(B.lightVertical)
+				.out(T.B 0, 0, 1, 1)
 				.pos(x + 1, y)
-				.out(B.lightDownAndRight)
+				.out(T.B 0, 1, 0, 1) 
 				.pos(x + 2, y)
-				.out(_.repeat B.lightHorizontal, width)
-				.out(B.lightDownAndLeft)
+				.out(_.repeat (T.B 1, 1, 0, 0), width)
+				.out(T.B 1, 0, 0, 1)
 				.pos(x + 2, y + 1)
 				.out(tab)
 				.out(" ×")	
-				.out(B.lightVertical)
+				.out(T.B 0, 0, 1, 1)
 				.pos(x + 2, y + 2)
 
 			T.pos(x + 1, y + 2)
 			if tab is @activeTab
-				T.out(B.lightUpAndLeft)
+				T.out(T.B 1, 0, 1, 0)
 					.out(_.repeat " ", width)
-					.out(B.lightUpAndRight)
+					.out(T.B 0, 1, 1, 0)
 			else
-				T.out(B.lightUpAndHorizontal)
-					.out(_.repeat B.lightHorizontal, width)
-					.out(B.lightUpAndHorizontal)
+				T.out(T.B 1, 1, 1, 0)
+					.out(_.repeat (T.B 1, 1, 0 ,0), width)
+					.out(T.B 1, 1, 1, 0)
 
 			x += width + 3
 
-		T.out(_.repeat B.lightHorizontal, T.width - (x - 1))
+		T.out(_.repeat (T.B 1, 1, 0, 0), T.width - (x - 1))
 
 		T.restoreCursor()
 
@@ -79,24 +77,53 @@ class T.Tabs extends T.Widget
 			.out(item)
 			.restoreFg().restoreBg()
 
-	unfocus: ->
-		@_label @items[@_focussed], T.C.g, T.C.k
+	unfocusTab: ->
+		if @_focussed isnt false
+			@_label @items[@_focussed], T.C.g, T.C.k
 
-	focus: ->
+	focusTab: ->
 		@_label @items[@_focussed], T.C.k, T.C.g
 		
+	focus: -> 
+		super()
+		@handleTab()
+
 	handleTab: -> 
+		@unfocusTab()
 		if @_focussed is false
 			@_focussed = 0
 		else
-			@unfocus()
 			@_focussed++
 
 		if @_focussed is @items.length
 			@_focussed = false
 			return false
 
-		@focus()
+		@focusTab()
 
-	handleKey: (char, key) -> 
-		T.pos(15, 15).out(key.name)
+	onKey_space: -> 
+		if @_focussed isnt false 
+			@activeTab = @items[@_focussed]
+			@draw()
+			@focusTab()
+			@emit "activeTab", @activeTab  
+
+	onKey_left: -> 
+		@unfocusTab()
+
+		if @_focussed is 0 
+			@_focussed = @items.length - 1
+		else 
+			@_focussed--
+
+		@focusTab() 
+
+	onKey_right: -> 
+		@unfocusTab()
+
+		@_focussed++
+
+		if @_focussed is @items.length
+			@_focussed = 0 
+
+		@focusTab()
