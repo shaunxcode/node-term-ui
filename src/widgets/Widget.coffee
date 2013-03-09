@@ -14,6 +14,9 @@ class T.Widget extends EventEmitter
     @allowFocus = true 
     @visible = false
 
+  calcDims: -> 
+    this 
+    
   disallowFocus: -> 
     @allowFocus = false
     this

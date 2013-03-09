@@ -10,13 +10,12 @@ class T.Select extends T.Box
 		@activeItem = opts.activeItem ? false
 
 	_drawRow: (x, y, content, index) -> 
-		if @activeItem is index 
-			bg = @contentColor 
-			@contentColor = T.C.k
-			T.saveBg().bg(bg)
-			super x, y, content
-			T.restoreBg()
-			@contentColor = bg 
+		if @activeItem is index 			
+			T.saveBg().bg(@contentColor)
+				.saveFg().fg(T.C.k)
+				.pos(x, y).out(content)
+				.restoreBg().restoreFg()
+
 			@emit "change", @activeItem, @content[@activeItem]
 		else
 			super x, y, content

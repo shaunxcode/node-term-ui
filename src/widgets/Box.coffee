@@ -3,12 +3,12 @@ _.mixin require "underscore.string"
 
 T = require "../TermUI"
 B = require "../boxChars"
-_dl = 20
-_d = (x) -> 
-	T.pos(1,  _dl++).eraseLine().out("#{_dl}:#{JSON.stringify x}")
-	if _dl > 30 then _dl = 19 
+
 class T.Box extends T.Widget
-	constructor: (opts) -> 
+	constructor: (opts = {}) -> 
+		@renderChar = opts.renderChar ? false 
+		@ellipsizeContent = opts.ellipsizeContent ? true
+		@hideScrollers = opts.hideScrollers ? false 
 		@content = opts.content ? []
 		@children = opts.children ? []
 
@@ -28,11 +28,16 @@ class T.Box extends T.Widget
 		if @borders.t then @vbdiff++
 		if @borders.b then @vbdiff++
 
+		if @content.length
+			@widestContent = _.last(_.sortBy @content, (c) -> c.length).length - 1
+		else
+			@widestContent = 0 
+
 		if opts.bounds?.w is "fit"
 			if @content.length
-				opts.bounds.w = _.last(_.sortBy @content, (c) -> c.length).length + @hbdiff 
+				opts.bounds.w = @widestContent + @hbdiff 
 			else
-				opts.bounds.w = 0 
+				opts.bounds.w = @widestContent
 
 			for child in @children 
 				if (nw = child.bounds.x + child.bounds.w + child.hbdiff) > opts.bounds.w
@@ -51,7 +56,8 @@ class T.Box extends T.Widget
 		super opts	
 		
 		@scrollPos = 0 
-		
+		@scrollPosX = 0 
+
 		@rightBorderChar = if @borders.r then (B 0, 0, 1, 1) else "" 
 		@leftBorderChar = if @borders.l then (B 0, 0, 1, 1) else ""
 
@@ -70,17 +76,23 @@ class T.Box extends T.Widget
 		@contentColor = opts.contentColor ? T.C.g
 		@calcDims()
 
+	calcDims: -> 
+		@maxWidth = @bounds.w - @hbdiff
+		@maxHeight = @bounds.h - @vbdiff
+		@maxScrollY = @bounds.y + @maxHeight
+		@maxScrollX = @bounds.x + @maxWidth 
+		@contentRangeY = [@bounds.y+1..@bounds.y+@maxHeight]
+		@rightBorderX = @bounds.x + @bounds.w - (if @borders.l then 1 else 0)
+
 		for child in @children 
 			child.bounds.x += @bounds.x 
 			child.bounds.y += @bounds.y
 			child.calcDims()
 
-	calcDims: -> 
-		@maxWidth = @bounds.w - @hbdiff
-		@maxHeight = @bounds.h - @vbdiff
-		@maxScrollY = @bounds.y + @maxHeight
-		@contentRange = [@bounds.y+1..@bounds.y+@maxHeight]
-		@rightBorderX = @bounds.x + @bounds.w - (if @borders.l then 1 else 0)
+	setBounds: (bounds) -> 
+		_.extend @bounds, bounds 
+		@calcDims()
+		@draw() 
 
 	setBorderColor: (c) -> 
 		@borderColor = c
@@ -107,7 +119,7 @@ class T.Box extends T.Widget
 				.out(if @borders.r then @botRightCorner else (B 1, 1, 0, 0))
 
 		
-		for row in @contentRange
+		for row in @contentRangeY
 			T.pos(@bounds.x, row)
 				.out(@leftBorderChar)
 				.pos(@rightBorderX, row)
@@ -119,30 +131,59 @@ class T.Box extends T.Widget
 		if @content.length > @maxHeight then @scroll 0 
 		@emit "drawn"
 
-	_drawRow: (x, y, content, index) -> 
-		T.saveFg().fg(@contentColor)
-		T.pos(x, y).out(content)
-		T.restoreFg()
+
+	_drawRow: (x, y, content, index) ->
+		T.saveFg().saveBg().pos x, y 
+
+		if @renderChar
+			for c in content when c.char
+				T.fg(c.fg).bg(c.bg).out c.char
+
+		else
+			T.fg(@contentColor).out(content)
+		
+		T.restoreFg().restoreBg()
+
 		this
 
 	drawContent: ->
 		l = 0 
+		c = 0 
+		@n = 35
 		x = @bounds.x + (if @borders.l then 1 else 0)
-		for line in @contentRange
+		for line in @contentRangeY
 			ci = @scrollPos + l++
-			content = (@content[ci] ? "")
-			 
+			
+			content = ""
+			if @content[ci]?
+				content = @content[ci][@scrollPosX..-1]
+
 			if content.length > @maxWidth
-				content = content[0..@maxWidth-3] + ".."
-			else
+				if @ellipsizeContent 
+					content = content[0..@maxWidth-3] + ".."
+				else 
+					content = content[0..@maxWidth-1] 
+			else if _.isString content
 				content = _.rpad content, @maxWidth, " "
 
 			@_drawRow x, line, content, ci 
 
-		child.draw() for child in @children 
+		@drawChildren()
 
 		@emit "contentDrawn"
+
 		this
+
+	drawChildren: -> 
+		child.draw() for child in @children 
+		this
+
+	_scrollX: -> 
+		if @scrollPosX is @widestContent - @maxWidth
+			@maxScrollX 
+		else
+			per = @scrollPosX / (@widestContent - @maxWidth + 1)
+			@bounds.x + Math.floor(@maxWidth * per) + 1
 
 	_scrollY: -> 
 		#get percentage we have scrolled
@@ -153,31 +194,58 @@ class T.Box extends T.Widget
 			@bounds.y + Math.floor(@maxHeight * per) + 1
 
 	scroll: (byAmt) -> 
-		T.saveFg().fg @borderColor 
+		if @content.length isnt 0 and not @hideScrollers
+			T.saveFg().fg @borderColor 
 
-		T.pos(@rightBorderX, @_scrollY())
-			.out(@rightBorderChar)
+			T.pos(@rightBorderX, @_scrollY())
+				.out(@rightBorderChar)
 
-		@scrollPos = @scrollPos + byAmt
+			@scrollPos += byAmt
 
-		T.pos(@rightBorderX, @_scrollY())
-			.out(B 0, 0, 3, 3)
+			T.pos(@rightBorderX, @_scrollY())
+				.out(B 0, 0, 3, 3)
 
-		T.restoreFg()
+			T.restoreFg()
+		else
+			@scrollPos += byAmt
 
 		@drawContent()
 
+	scrollX: (byAmt) -> 
+		@scrollPosX += byAmt
+		@drawContent()
+
 	onKey_up: ->
+		return if @content.length is 0 
+
 		if @scrollPos is 0 
 			@scroll 0
 		else
 			@scroll -1
 
 	onKey_down: -> 
+		return if @content.length is 0 
+
 		if @scrollPos is @content.length - @maxHeight
 			@scroll 0 
 		else
 			@scroll 1 
+
+	onKey_left: -> 
+		return if @content.length is 0 
+
+		if @scrollPosX is 0 
+			@scrollX 0 
+		else
+			@scrollX -1
+
+	onKey_right: -> 
+		return if @content.length is 0 
+
+		if @scrollPosX is @widestContent - @maxWidth
+			@scrollX 0 
+		else 
+			@scrollX 1
 
 	focus: -> 
 		super()
