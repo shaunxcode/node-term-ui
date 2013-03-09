@@ -226,7 +226,7 @@ class T.Box extends T.Widget
 	onKey_down: -> 
 		return if @content.length is 0 
 
-		if @scrollPos is @content.length - @maxHeight
+		if (@scrollPos is @content.length - @maxHeight) or @content.length < @maxHeight
 			@scroll 0 
 		else
 			@scroll 1 

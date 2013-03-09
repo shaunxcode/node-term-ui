@@ -24,6 +24,7 @@ class T.Widget extends EventEmitter
   draw: ->
     @visible = true
     @emit "drawn"
+    this
 
   hitTest: (x, y) ->
     (@bounds.x <= x <= (@bounds.x + @bounds.w - 1)) and

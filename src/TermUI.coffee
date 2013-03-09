@@ -101,8 +101,8 @@ module.exports = T = new class TermUI extends EventEmitter
   pos: (x, y) ->
     x = if x < 0 then @width - x else x
     y = if y < 0 then @height - y else y
-    x = Math.max(Math.min(x, @width), 1)
-    y = Math.max(Math.min(y, @height), 1)
+    x = Math.floor Math.max Math.min(x, @width), 1
+    y = Math.floor Math.max Math.min(y, @height), 1
     @out "\x1b[#{y};#{x}H"
     this
 
