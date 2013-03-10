@@ -193,12 +193,13 @@ class T.Box extends T.Widget
 			per = @scrollPos / (@content.length - @maxHeight + 1)
 			@bounds.y + Math.floor(@maxHeight * per) + 1
 
+	hasScrollableContent: -> 
+		@content.length > @maxHeight
+		
 	scroll: (byAmt) -> 
-		if @content.length isnt 0 and not @hideScrollers
-			T.saveFg().fg @borderColor 
-
+		if @content.length isnt 0 and not @hideScrollers and @hasScrollableContent()
 			T.pos(@rightBorderX, @_scrollY())
-				.out(@rightBorderChar)
+				.out(@rightBorderChar) 
 
 			@scrollPos += byAmt
 
@@ -226,7 +227,7 @@ class T.Box extends T.Widget
 	onKey_down: -> 
 		return if @content.length is 0 
 
-		if (@scrollPos is @content.length - @maxHeight) or @content.length < @maxHeight
+		if (@scrollPos is @content.length - @maxHeight) or (not @hasScrollableContent())
 			@scroll 0 
 		else
 			@scroll 1 

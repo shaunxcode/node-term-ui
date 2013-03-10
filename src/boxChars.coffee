@@ -2,6 +2,7 @@
 #	light: 1 
 #	heavy: 2
 #	double: 3
+#	curves: 6
 
 boxChars =
 	"1100": 0x2500
