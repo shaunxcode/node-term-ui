@@ -11,19 +11,32 @@ class T.Tabs extends T.Widget
 		@x = opts.x ? 1
 		@y = opts.y ? 1
 
-		@items =(for tab in (opts.items ? [])
-			if not _.isArray tab
-				[tab, tab]
-			else
-				tab)
-
+		@setItems opts.items ? []
+		
 		@lineColor = opts.lineColor ? T.C.g
 		@textColor = opts.textColor ? T.C.g
 		@spaceBefore = opts.spaceBefore ? 1
 		@spaceBetween = opts.spaceBetween ? 1
-		@activeTab = opts.activeTab ? @items[0] ? false
+		@activeTabs = opts.activeTab ? false 
+		
+	setItems: (items) ->
+		@width = 0 
+		@items =(for tab in items
+			if not _.isArray tab
+				[tab, tab]
+			else
+				tab)
+				
+		@width += item[1].length + 3 for item in @items
+		
+		@activeTab = false
 		@_tabBounds = {}
 		@_focussed = false
+
+	setActiveTab: (tab) ->
+		@activeTab = tab 
+		@draw()
+		this
 		
 	draw: -> 
 		x = @x 
@@ -86,10 +99,8 @@ class T.Tabs extends T.Widget
 						.out(_.repeat (T.B 1, 1, 0 ,0), width)
 						.out(T.B 1, 1, 0, 1)
 
-
 			x += width + 3
 			
-		@width = x - @x
 		T.restoreCursor()
 		super()
 		
