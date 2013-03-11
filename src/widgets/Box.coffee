@@ -28,31 +28,6 @@ class T.Box extends T.Widget
 		if @borders.t then @vbdiff++
 		if @borders.b then @vbdiff++
 
-		if @content.length
-			@widestContent = _.last(_.sortBy @content, (c) -> c.length).length - 1
-		else
-			@widestContent = 0 
-
-		if opts.bounds?.w is "fit"
-			if @content.length
-				opts.bounds.w = @widestContent + @hbdiff 
-			else
-				opts.bounds.w = @widestContent
-
-			for child in @children 
-				if (nw = child.bounds.x + child.bounds.w + child.hbdiff) > opts.bounds.w
-					opts.bounds.w = nw
-
-		if opts.bounds?.h is "fit"
-			if @content.length
-				opts.bounds.h = @content.length + @vbdiff 
-			else
-				opts.bounds.h = 0 
-
-			for child in @children 
-				if (nh = child.bounds.y + child.bounds.h + child.vbdiff) > opts.bounds.h
-					opts.bounds.h = nh
-
 		super opts	
 		
 		@scrollPos = 0 
@@ -77,6 +52,34 @@ class T.Box extends T.Widget
 		@calcDims()
 
 	calcDims: -> 
+		for k, v of @bounds 
+			@bounds[k] = Math.floor v
+	
+		if @content.length
+			@widestContent = _.last(_.sortBy @content, (c) -> c.length).length 
+		else
+			@widestContent = 0 
+
+		if @options.bounds?.w is "fit"
+			if @content.length
+				@bounds.w = @widestContent + @hbdiff 
+			else
+				@bounds.w = @widestContent
+
+			for child in @children 
+				if (nw = child.bounds.x + child.bounds.w + child.hbdiff) > @bounds.w
+					@bounds.w = nw
+
+		if @options.bounds?.h is "fit"
+			if @content.length
+				@bounds.h = @content.length + @vbdiff 
+			else
+				@bounds.h = 0 
+
+			for child in @children 
+				if (nh = child.bounds.y + child.bounds.h + child.vbdiff) > @bounds.h
+					@bounds.h = nh
+					
 		@maxWidth = @bounds.w - @hbdiff
 		@maxHeight = @bounds.h - @vbdiff
 		@maxScrollY = @bounds.y + @maxHeight
@@ -89,11 +92,18 @@ class T.Box extends T.Widget
 			child.bounds.y += @bounds.y
 			child.calcDims()
 
+	setContent: (content) -> 
+		@content = content 
+		@calcDims()
+		@draw()
+		this
+		
 	setBounds: (bounds) -> 
 		_.extend @bounds, bounds 
 		@calcDims()
 		@draw() 
-
+		this
+		
 	setBorderColor: (c) -> 
 		@borderColor = c
 		this 
@@ -113,7 +123,7 @@ class T.Box extends T.Widget
 
 		
 		if @borders.b
-			T.pos(@bounds.x, @bounds.y + @bounds.h - 1)
+			T.pos(@bounds.x, @bounds.y + @bounds.h - (Math.floor @vbdiff / 2))
 				.out(if @borders.l then @botLeftCorner else (B 0, 0, 1, 1))
 				.out(_.repeat (B 1, 1, 0, 0), @bounds.w - @hbdiff)
 				.out(if @borders.r then @botRightCorner else (B 1, 1, 0, 0))
@@ -129,7 +139,7 @@ class T.Box extends T.Widget
 		T.restoreFg()
 
 		if @content.length > @maxHeight then @scroll 0 
-		@emit "drawn"
+		@emit "bordersDrawn"
 
 
 	_drawRow: (x, y, content, index) ->
@@ -252,7 +262,8 @@ class T.Box extends T.Widget
 		super()
 		@setBorderColor T.C.y 
 		@drawBorders()
-  
+		this
+
 	blur: -> 
 		super()
 		@setBorderColor T.C.g

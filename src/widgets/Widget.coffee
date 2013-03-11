@@ -9,10 +9,20 @@ class T.Widget extends EventEmitter
       w: @options.bounds?.w or 1
       h: @options.bounds?.h or 1
 
-    
     @_widgetIndex = (T.Widget.instances.push this) - 1
-    @allowFocus = true 
+    @allowFocus = @options.allowFocus ? true 
     @visible = false
+
+  destroy: ->
+    wi = 0
+    instances = []
+    for widget in T.Widget.activeInstances when widget isnt this
+        widget._widgetIndex = wi++
+        instances.push widget
+
+    T.Widget.activeInstances = instances
+    @destroyed = true
+    @allowFocus = false
 
   calcDims: -> 
     this 

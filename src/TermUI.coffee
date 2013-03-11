@@ -1,3 +1,4 @@
+fs = require "fs"
 util = require 'util'
 tty = require 'tty'
 keypress = require 'keypress'
@@ -20,7 +21,11 @@ rgb = (r, g, b) ->
   rgb5 r / 255 * 5, g / 255 * 5, b / 255 * 5
 
 # ===============================================================[ TermUI ]====
+_dc = 0
 module.exports = T = new class TermUI extends EventEmitter
+  _d: (vals...) ->
+    fs.appendFile "#{process.cwd()}/_term-ui-debug.log", "#{_dc++}: #{(JSON.stringify x for x in vals).join " "}\n"
+
   constructor: ->
 
     if tty.isatty process.stdin
