@@ -40,6 +40,16 @@ class T.Widget extends EventEmitter
     (@bounds.x <= x <= (@bounds.x + @bounds.w - 1)) and
     (@bounds.y <= y <= (@bounds.y + @bounds.h - 1))
 
+  hide: -> 
+     @hidden = true
+     @visible = false
+     this
+
+   show: -> 
+     @hidden = false
+     @draw()
+     this
+
   handleTab: -> 
 
   handleKey: (char, key) -> 

@@ -39,6 +39,7 @@ class T.Tabs extends T.Widget
 		this
 		
 	draw: -> 
+		return if @hidden 
 		x = @x 
 		y = @y 
 				
@@ -114,6 +115,8 @@ class T.Tabs extends T.Widget
     				return true
 
 	_label: (item, fg, bg) -> 
+		return if @hidden 
+		
 		[tabId, tab] = item
 		bounds = @_tabBounds[tabId]
 

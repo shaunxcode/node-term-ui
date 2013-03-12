@@ -109,10 +109,11 @@ class T.Box extends T.Widget
 		this 
 
 	draw: -> 
+		return if @hidden 
 		@drawBorders()
 		@drawContent()
 		super()
-
+		
 	drawBorders: ->
 		T.hideCursor().saveFg().fg @borderColor
 		if @borders.t 
