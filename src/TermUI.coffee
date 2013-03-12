@@ -56,6 +56,8 @@ module.exports = T = new class TermUI extends EventEmitter
 
   B: require "./boxChars"
   
+  G: require "./Geometry"
+	
   SYM: {
     star: '\u2605',
     check: '\u2714',

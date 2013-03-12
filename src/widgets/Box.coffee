@@ -56,6 +56,7 @@ class T.Box extends T.Widget
 			@bounds[k] = Math.floor v
 	
 		if @content.length
+			T._d @content
 			@widestContent = _.last(_.sortBy @content, (c) -> c.length).length 
 		else
 			@widestContent = 0 
@@ -144,12 +145,14 @@ class T.Box extends T.Widget
 
 
 	_drawRow: (x, y, content, index) ->
-		T.saveFg().saveBg().pos x, y 
+		T.saveFg().saveBg().pos(x, y)
 
 		if @renderChar
-			for c in content when c.char
-				T.fg(c.fg).bg(c.bg).out c.char
-
+			for c in content
+				if c?.char?
+					T.fg(c.fg).bg(c.bg).out c.char
+				else T.out " "
+				
 		else
 			T.fg(@contentColor).out(content)
 		
@@ -209,6 +212,7 @@ class T.Box extends T.Widget
 		
 	scroll: (byAmt) -> 
 		if @content.length isnt 0 and not @hideScrollers and @hasScrollableContent()
+			T.saveFg().fg(@borderColor)
 			T.pos(@rightBorderX, @_scrollY())
 				.out(@rightBorderChar) 
 
