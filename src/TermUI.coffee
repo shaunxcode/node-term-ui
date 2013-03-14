@@ -228,7 +228,7 @@ module.exports = T = new class TermUI extends EventEmitter
     process.stdin.setRawMode false
     process.exit()
 
-
+require "./BigWords"
 require "./widgets/Widget"
 require "./widgets/Button"
 require "./widgets/Box"

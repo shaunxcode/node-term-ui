@@ -936,7 +936,7 @@ FC-----
 for letter, stencil of font
 	font[letter] = stencil.split "\n"
 
-module.exports = 
+T.BigWords = 
 	convert: (words, type = "thin") -> 
 		result = ["","","","","","",""]
 		for letter in words.split ""
@@ -951,13 +951,3 @@ module.exports =
 		for sym, char of Chars[type]
 			result = result.replace (new RegExp sym, "g"), char
 		result
-
-console.log module.exports.convert "abcdefghijklmnop"
-console.log module.exports.convert "ABCDEFGHIJKLMNOP"
-console.log module.exports.convert "qrstuvwxyz"
-console.log module.exports.convert "QRSTUVWXYZ[]<>`~|"
-console.log module.exports.convert "0123456789{},.:;?"
-console.log module.exports.convert "!@#$%^&*()-_+=\\/"
-console.log module.exports.convert "(lambda (x y) (+ x y))"
-console.log module.exports.convert "The theory of the Mobius"
-console.log module.exports.convert "[//%]mod.exp = {cat: -> !@rat()}"
